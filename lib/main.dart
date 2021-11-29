@@ -62,42 +62,76 @@ class _MyHomePageState extends State<MyHomePage> {
   ListView _buildListViewOfDevices() {
     List<Container> containers = <Container>[];
     for (BluetoothDevice device in widget.devicesList) {
-      containers.add(
-        Container(
-          height: 50,
-          child: Row(
-            children: <Widget>[
-              Expanded(
-                child: Column(
-                  children: <Widget>[
-                    Text(device.name == '' ? '(unknown device)' : device.name),
-                    Text(device.id.toString()),
-                  ],
+      if (device.name.contains('Mi Smart Band')) {
+        containers.add(
+          Container(
+            height: 150,
+            child: Row(
+              children: <Widget>[
+                Expanded(
+                  child: Column(
+                    children: <Widget>[
+                      Text(
+                          device.name == '' ? '(unknown device)' : device.name),
+                      Text(device.id.toString()),
+                    ],
+                  ),
                 ),
-              ),
-              TextButton(
-                child: Text(
-                  'Connect',
-                  style: TextStyle(color: Colors.white),
+                TextButton(
+                  child: const Text(
+                    'Connect',
+                    style: TextStyle(color: Colors.black),
+                  ),
+                  onPressed: () async {
+                    widget.flutterBlue.stopScan();
+                    try {
+                      print('1');
+                      await device.connect();
+                      print('111');
+                    } catch (e) {
+                      print('2');
+                      print(e);
+                      print('222');
+                    } finally {
+                      print('3');
+                      _services = await device.discoverServices();
+                      print('333');
+                    }
+                    print('544455');
+                    setState(() {
+                      _connectedDevice = device;
+                    });
+                  },
                 ),
-                onPressed: () async {
-                  widget.flutterBlue.stopScan();
-                  try {
-                    await device.connect();
-                  } catch (e) {
-                    print(e);
-                  } finally {
-                    _services = await device.discoverServices();
-                  }
-                  setState(() {
-                    _connectedDevice = device;
-                  });
-                },
-              ),
-            ],
+                TextButton(
+                  child: const Text(
+                    'DisConnect',
+                    style: TextStyle(color: Colors.black),
+                  ),
+                  onPressed: () async {
+                    widget.flutterBlue.stopScan();
+                    try {
+                      print('11');
+                      await device.disconnect();
+                      print('111');
+                    } catch (e) {
+                      print('2');
+                      print(e);
+                      print('222');
+                    }
+                    print('544455');
+                    setState(() {
+                      _connectedDevice = null;
+                    });
+                  },
+                ),
+              ],
+            ),
           ),
-        ),
-      );
+        );
+      } else {
+        print('아님');
+      }
     }
 
     return ListView(
@@ -275,3 +309,25 @@ class _MyHomePageState extends State<MyHomePage> {
         body: _buildView(),
       );
 }
+
+
+
+/// 
+/// mi fit 앱 다운로드
+/// 밴드 연결
+/// 검색 가능 ON -> 이거 해야 bluetooth 검색 가능
+/// 
+/// 
+/// 미밴드6(한규) - 2DA091D2-B5C3-08E3-00FC-0D47624C8247
+/// uuid: 00002a37-0000-1000-8000-00805f9b34fb value: {length = 2, bytes = 0x0041}
+/// uuid: 00002a37-0000-1000-8000-00805f9b34fb value: {length = 2, bytes = 0x0048}
+/// 
+/// 미밴드4 - 6452AA43-7BF2-B727-9CAC-26CDB2FC0A44
+/// uuid: 00002a37-0000-1000-8000-00805f9b34fb value: {length = 2, bytes = 0x0041}
+/// uuid: 00002a37-0000-1000-8000-00805f9b34fb value: {length = 2, bytes = 0x0048}
+/// 
+/// 미밴드6(한규) - 
+/// 
+/// 
+/// Connect 해서 기기랑 연결하고, 더 이상 필요없으면 disconnect 꼭 해주기
+/// 
