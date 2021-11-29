@@ -331,3 +331,5 @@ class _MyHomePageState extends State<MyHomePage> {
 /// 
 /// Connect 해서 기기랑 연결하고, 더 이상 필요없으면 disconnect 꼭 해주기
 /// 
+/// 180d -> 심박 데이터 sercice id
+/// 
