@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue/flutter_blue.dart';
 
+import 'package:flutter_blue/gen/flutterblue.pb.dart' as proto;
+
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
@@ -22,6 +24,7 @@ class MyHomePage extends StatefulWidget {
   final String title;
   final FlutterBlue flutterBlue = FlutterBlue.instance;
   final devicesList = <BluetoothDevice>[];
+  final connectedDevicesList = <BluetoothDevice>[];
   final readValues = <Guid, List<int>>{};
 
   @override
@@ -41,28 +44,51 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
+  _addConnectedDeviceTolist(final BluetoothDevice device) {
+    if (!widget.connectedDevicesList.contains(device)) {
+      setState(() {
+        widget.connectedDevicesList.add(device);
+      });
+    }
+  }
+
   @override
   void initState() {
     super.initState();
-    widget.flutterBlue.connectedDevices
-        .asStream()
-        .listen((List<BluetoothDevice> devices) {
-      for (BluetoothDevice device in devices) {
-        _addDeviceTolist(device);
-      }
-    });
+    // widget.flutterBlue.connectedDevices
+    //     .asStream()
+    //     .listen((List<BluetoothDevice> devices) {
+    //   for (BluetoothDevice device in devices) {
+    //     _addConnectedDeviceTolist(device);
+    //   }
+    //   // var p = proto.BluetoothDevice.create()
+    //   //   ..name = 'Mi Smart Band 6'
+    //   //   ..remoteId = 'AB2FA54A-C3C8-ED16-1C69-46DDA1915544'
+    //   //   ..type = proto.BluetoothDevice_Type.LE;
+    //   // print(p.toString());
+    //   // BluetoothDevice dummy = BluetoothDevice.fromProto(p);
+
+    //   // _addConnectedDeviceTolist(dummy);
+    // });
     widget.flutterBlue.scanResults.listen((List<ScanResult> results) {
       for (ScanResult result in results) {
-        _addDeviceTolist(result.device);
+        _addConnectedDeviceTolist(result.device);
       }
     });
     widget.flutterBlue.startScan();
+
+    // BluetoothDevice.fromProto(Proto)
+    // _addDeviceTolist()
   }
 
   ListView _buildListViewOfDevices() {
     List<Container> containers = <Container>[];
-    for (BluetoothDevice device in widget.devicesList) {
-      if (device.name.contains('Mi Smart Band')) {
+    for (BluetoothDevice device in widget.connectedDevicesList) {
+      if (device.name.contains('')) {
+        print('name: ${device.name}');
+        print('name: ${device.id}');
+        print('name: ${device.type}');
+        print('name: ${device.toString()}');
         containers.add(
           Container(
             height: 150,
@@ -85,18 +111,21 @@ class _MyHomePageState extends State<MyHomePage> {
                   onPressed: () async {
                     widget.flutterBlue.stopScan();
                     try {
-                      print('1');
+                      print('1: ${device.name}');
+                      print('1: ${device.type}');
+                      print('1: ${device.id}');
                       await device.connect();
                       print('111');
                     } catch (e) {
                       print('2');
                       print(e);
                       print('222');
-                    } finally {
-                      print('3');
-                      _services = await device.discoverServices();
-                      print('333');
                     }
+                    // finally {
+                    //   print('3');
+                    //   _services = await device.discoverServices();
+                    //   print('333');
+                    // }
                     print('544455');
                     setState(() {
                       _connectedDevice = device;
@@ -160,6 +189,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 var sub = characteristic.value.listen((value) {
                   setState(() {
                     widget.readValues[characteristic.uuid] = value;
+                    print('오오: ${value}');
                   });
                 });
                 await characteristic.read();
@@ -230,6 +260,8 @@ class _MyHomePageState extends State<MyHomePage> {
               onPressed: () async {
                 characteristic.value.listen((value) {
                   widget.readValues[characteristic.uuid] = value;
+                  print('아아아: ${value}');
+                  setState(() {});
                 });
                 await characteristic.setNotifyValue(true);
               },
